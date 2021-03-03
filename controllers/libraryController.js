@@ -4,7 +4,7 @@ const Library = require('../models/library');
 const { Schema } = require('mongoose');
 
 exports.getLibraries = async (req, res, next) => {
-  const libraries = await Library.find({}).select('-users -books');
+  const libraries = await Library.find({}).select('-users -books -orders');
 
   res.status(200).json({
     data: libraries,
@@ -14,7 +14,7 @@ exports.getLibraries = async (req, res, next) => {
 exports.getLibrary = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
-    const library = await Library.findById(libraryId).select('-users');
+    const library = await Library.findById(libraryId).select('-users -orders');
     await library.populate('books.book').execPopulate();
     if (!library) return next(new Error('Library does not exist')); // display of errors will be fixed.
     res.status(200).json({
@@ -46,12 +46,41 @@ exports.increaseStock = async (req, res, next) => {
   }
 };
 
+exports.updateStock = async (req, res, next) => {
+  try {
+    const libraryId = req.params.libraryId;
+    const bookId = req.params.bookId;
+    const { newStock } = req.body;
+    await Library.findOneAndUpdate(
+      { _id: libraryId, 'books.book': { $eq: bookId } },
+      { $set: { 'books.$.stock': newStock } },
+      { new: false, useFindAndModify: false }
+    );
+    const library = await Library.findById(libraryId);
+    await library.populate('books.book').execPopulate();
+    await library.populate('users.user').execPopulate();
+    res.status(200).json({
+      data: library,
+      message: 'Number of stock was updated.',
+    });
+  } catch (error) {
+    res.status(500).json({
+      error,
+    });
+  }
+};
+
 exports.getLibraryForAttendant = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
     const library = await Library.findById(libraryId);
-    await library.populate('books.book').execPopulate();
-    await library.populate('users.user').execPopulate();
+    const populateQuery = [
+      { path: 'books.book' },
+      { path: 'users.user', select: 'firstName email' },
+      { path: 'orders.books', select: 'image title' },
+      { path: 'orders.user', select: 'firstName email' },
+    ];
+    await library.populate(populateQuery).execPopulate();
     if (!library) return next(new Error('Library does not exist')); // display of errors will be fixed.
     res.status(200).json({
       data: library,
@@ -177,9 +206,9 @@ exports.updateLibrary = async (req, res, next) => {
 exports.deleteLibrary = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
-    await Library.findByIdAndDelete(libraryId);
+    const data = await Library.findByIdAndDelete(libraryId);
     res.status(200).json({
-      data: null,
+      data,
       message: 'Library has been deleted',
     });
   } catch (error) {

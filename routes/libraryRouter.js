@@ -57,4 +57,11 @@ router.put(
   libraryController.updateLibrary
 );
 
+router.put(
+  '/:libraryId/:bookId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.updateStock
+);
+
 module.exports = router;

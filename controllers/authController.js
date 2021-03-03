@@ -154,7 +154,7 @@ const getRefreshToken = async (token) => {
 const generateJwtToken = (user) => {
   // create a jwt token containing the user id that expires in 15 minutes
   return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '1d',
+    expiresIn: '1w',
   });
 };
 

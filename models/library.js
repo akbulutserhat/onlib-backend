@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 const librarySchema = new Schema({
   name: { type: String, required: true },
   address: { type: String, required: true },
+  city: { type: String, required: true },
   books: [
     {
       book: {
@@ -43,7 +44,7 @@ const librarySchema = new Schema({
         ref: 'User',
       },
       private_info: {
-        tcNo: String,
+        SSN: String, // For example: Tc No
         phone: String,
       },
     },
