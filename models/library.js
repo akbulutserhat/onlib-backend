@@ -44,7 +44,7 @@ const librarySchema = new Schema({
         ref: 'User',
       },
       private_info: {
-        SSN: String, // For example: Tc No
+        ssn: String, // For example: Tc No
         phone: String,
       },
     },

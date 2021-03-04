@@ -3,6 +3,13 @@ const User = require('../models/user');
 const Library = require('../models/library');
 const { Schema } = require('mongoose');
 
+const populateQuery = [
+  { path: 'books.book' },
+  { path: 'users.user', select: 'firstName email' },
+  { path: 'orders.books', select: 'image title' },
+  { path: 'orders.user', select: 'firstName email' },
+];
+
 exports.getLibraries = async (req, res, next) => {
   const libraries = await Library.find({}).select('-users -books -orders');
 
@@ -51,17 +58,37 @@ exports.updateStock = async (req, res, next) => {
     const libraryId = req.params.libraryId;
     const bookId = req.params.bookId;
     const { newStock } = req.body;
-    await Library.findOneAndUpdate(
+    const library = await Library.findOneAndUpdate(
       { _id: libraryId, 'books.book': { $eq: bookId } },
       { $set: { 'books.$.stock': newStock } },
-      { new: false, useFindAndModify: false }
+      { new: true, useFindAndModify: false }
     );
-    const library = await Library.findById(libraryId);
-    await library.populate('books.book').execPopulate();
-    await library.populate('users.user').execPopulate();
+    await library.populate(populateQuery).execPopulate();
     res.status(200).json({
       data: library,
       message: 'Number of stock was updated.',
+    });
+  } catch (error) {
+    res.status(500).json({
+      error,
+    });
+  }
+};
+
+exports.updateOrder = async (req, res, next) => {
+  try {
+    const libraryId = req.params.libraryId;
+    const orderId = req.params.orderId;
+    const { status } = req.body;
+    const library = await Library.findOneAndUpdate(
+      { _id: libraryId, 'orders._id': { $eq: orderId } },
+      { $set: { 'orders.$.status': status } },
+      { new: true, useFindAndModify: false }
+    );
+    await library.populate(populateQuery).execPopulate();
+    res.status(200).json({
+      data: library,
+      message: 'status of order was updated.',
     });
   } catch (error) {
     res.status(500).json({
@@ -74,12 +101,6 @@ exports.getLibraryForAttendant = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
     const library = await Library.findById(libraryId);
-    const populateQuery = [
-      { path: 'books.book' },
-      { path: 'users.user', select: 'firstName email' },
-      { path: 'orders.books', select: 'image title' },
-      { path: 'orders.user', select: 'firstName email' },
-    ];
     await library.populate(populateQuery).execPopulate();
     if (!library) return next(new Error('Library does not exist')); // display of errors will be fixed.
     res.status(200).json({
@@ -145,12 +166,12 @@ exports.addUserToLibrary = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
     const userId = req.params.userId;
-    const { tcNo, phone } = req.body;
+    const { ssn, phone } = req.body;
     const library = await Library.findOneAndUpdate(
       { _id: libraryId, 'users.user': { $ne: userId } },
       {
         $push: {
-          users: { user: userId, private_info: { tcNo: tcNo, phone: phone } },
+          users: { user: userId, private_info: { ssn, phone } },
         },
       },
       { new: true, useFindAndModify: false }
