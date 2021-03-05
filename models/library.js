@@ -29,7 +29,7 @@ const librarySchema = new Schema({
       status: {
         type: String,
         default: 'preparing',
-        enum: ['preparing', 'ready', 'delivered', 'waiting', 'received'],
+        enum: ['preparing', 'ready', 'delivered', 'received'],
       },
       order_date: {
         type: Date,

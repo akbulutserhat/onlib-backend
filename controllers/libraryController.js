@@ -34,6 +34,41 @@ exports.getLibrary = async (req, res, next) => {
   }
 };
 
+exports.addUserToLibrary = async (req, res, next) => {
+  try {
+    const libraryId = req.params.libraryId;
+    const userId = req.params.userId;
+    const { userData } = req.body;
+    const { ssn, phone } = userData;
+    const library = await Library.findOneAndUpdate(
+      { _id: libraryId, 'users.user': { $ne: userId } },
+      {
+        $push: {
+          users: { user: userId, private_info: { ssn, phone } },
+        },
+      },
+      { new: true, useFindAndModify: false }
+    );
+    if (library) {
+      // No duplicate
+      await library.populate(populateQuery).execPopulate();
+      res.status(200).json({
+        data: library,
+        message: 'User was added to the library.',
+      });
+    } else {
+      // There is a duplication. Dont need to adding.
+      res.status(400).json({
+        message: 'User was already added to the library. Dont need to adding !',
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      error,
+    });
+  }
+};
+
 exports.increaseStock = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
@@ -45,6 +80,28 @@ exports.increaseStock = async (req, res, next) => {
     );
     res.status(200).json({
       message: 'Number of stock was increased.',
+    });
+  } catch (error) {
+    res.status(500).json({
+      error,
+    });
+  }
+};
+
+exports.updateOrderStatus = async (req, res, next) => {
+  try {
+    const libraryId = req.params.libraryId;
+    const orderId = req.params.orderId;
+    const { status } = req.body;
+    const library = await Library.findOneAndUpdate(
+      { _id: libraryId, 'orders._id': { $eq: orderId } },
+      { $set: { 'orders.$.status': status } },
+      { new: true, useFindAndModify: false }
+    );
+    await library.populate(populateQuery).execPopulate();
+    res.status(200).json({
+      data: library,
+      message: 'status of order was updated.',
     });
   } catch (error) {
     res.status(500).json({
@@ -67,28 +124,6 @@ exports.updateStock = async (req, res, next) => {
     res.status(200).json({
       data: library,
       message: 'Number of stock was updated.',
-    });
-  } catch (error) {
-    res.status(500).json({
-      error,
-    });
-  }
-};
-
-exports.updateOrder = async (req, res, next) => {
-  try {
-    const libraryId = req.params.libraryId;
-    const orderId = req.params.orderId;
-    const { status } = req.body;
-    const library = await Library.findOneAndUpdate(
-      { _id: libraryId, 'orders._id': { $eq: orderId } },
-      { $set: { 'orders.$.status': status } },
-      { new: true, useFindAndModify: false }
-    );
-    await library.populate(populateQuery).execPopulate();
-    res.status(200).json({
-      data: library,
-      message: 'status of order was updated.',
     });
   } catch (error) {
     res.status(500).json({
@@ -162,38 +197,6 @@ exports.addBookToLibrary = async (req, res, next) => {
   }
 };
 
-exports.addUserToLibrary = async (req, res, next) => {
-  try {
-    const libraryId = req.params.libraryId;
-    const userId = req.params.userId;
-    const { ssn, phone } = req.body;
-    const library = await Library.findOneAndUpdate(
-      { _id: libraryId, 'users.user': { $ne: userId } },
-      {
-        $push: {
-          users: { user: userId, private_info: { ssn, phone } },
-        },
-      },
-      { new: true, useFindAndModify: false }
-    );
-    if (library) {
-      // No duplicate
-      res.status(200).json({
-        message: 'User was added to the library.',
-      });
-    } else {
-      // There is a duplication. Dont need to adding.
-      res.status(404).json({
-        message: 'User was already added to the library. Dont need to adding !',
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
-      error,
-    });
-  }
-};
-
 exports.clear_orders = async (req, res) => {
   const libraryId = req.params.libraryId;
   await Library.findByIdAndUpdate(
@@ -253,7 +256,10 @@ exports.deleteBookFromLibrary = async (req, res, next) => {
       { $pull: { libraries: libraryId } },
       { safe: true, useFindAndModify: false }
     );
+    const library = Library.findById(libraryId);
+    await library.populate(populateQuery).execPopulate();
     res.status(200).json({
+      data: library,
       message: 'Book was deleted from the library.',
     });
   } catch (err) {

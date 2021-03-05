@@ -51,6 +51,13 @@ router.delete(
 );
 
 router.put(
+  '/order/:libraryId/:orderId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.updateOrderStatus
+);
+
+router.put(
   '/:libraryId',
   allowIfLoggedin,
   grantAccess('readAny', 'profile'),
@@ -58,10 +65,24 @@ router.put(
 );
 
 router.put(
-  '/:libraryId/:bookId',
+  '/user/:libraryId/:userId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.addUserToLibrary
+);
+
+router.put(
+  '/book/:libraryId/:bookId',
   allowIfLoggedin,
   grantAccess('readAny', 'profile'),
   libraryController.updateStock
+);
+
+router.put(
+  '/book/delete/:libraryId/:bookId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.deleteBookFromLibrary
 );
 
 module.exports = router;
