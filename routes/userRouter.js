@@ -9,7 +9,7 @@ router.get('/:userId', allowIfLoggedin, userController.getUser);
 router.get(
   '/users',
   allowIfLoggedin,
-  grantAccess('readAny', 'profile'),
+  grantAccess('updateAny', 'profile'),
   userController.getUsers
 );
 

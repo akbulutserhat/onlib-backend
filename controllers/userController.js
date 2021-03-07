@@ -3,9 +3,15 @@ const Library = require('../models/library');
 const User = require('../models/user');
 
 exports.getUsers = async (req, res, next) => {
-  const users = await User.find({});
+  const page = parseInt(req.params.page);
+  const limit = parseInt(req.params.limit);
+  const users = await User.find({})
+    .skip(limit * page)
+    .limit(limit);
+  const count = await User.countDocuments();
   res.status(200).json({
     data: users,
+    count,
   });
 };
 
@@ -28,8 +34,7 @@ exports.updateUser = async (req, res, next) => {
   try {
     const update = req.body;
     const userId = req.params.userId;
-    await User.findByIdAndUpdate(userId, update);
-    const user = await User.findById(userId);
+    const user = await User.findByIdAndUpdate(userId, update, { new: true });
     res.status(200).json({
       data: user,
       message: 'User has been updated',
@@ -44,9 +49,9 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    await User.findByIdAndDelete(userId);
+    const user = await User.findByIdAndDelete(userId);
     res.status(200).json({
-      data: null,
+      data: user,
       message: 'User has been deleted',
     });
   } catch (error) {
