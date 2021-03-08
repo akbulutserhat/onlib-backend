@@ -6,6 +6,7 @@ exports.getUsers = async (req, res, next) => {
   const page = parseInt(req.params.page);
   const limit = parseInt(req.params.limit);
   const users = await User.find({})
+    .select('fullName email role _id')
     .skip(limit * page)
     .limit(limit);
   const count = await User.countDocuments();

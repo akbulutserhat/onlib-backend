@@ -21,11 +21,8 @@ exports.loginValidate = [
 ];
 
 exports.signup = async (req, res, next) => {
-  // Check for validation error
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).send(errors);
   try {
-    const { email, password, firstName, role } = req.body;
+    const { email, password, fullName, role } = req.body;
     const user = await User.findOne({ email });
     if (user)
       return res.status(401).json({
@@ -36,7 +33,7 @@ exports.signup = async (req, res, next) => {
     const newUser = new User({
       email,
       password: hashedPassword,
-      firstName,
+      fullName,
       role: role || 'basic',
     });
     const accessToken = jwt.sign(
