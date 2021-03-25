@@ -36,19 +36,13 @@ exports.signup = async (req, res, next) => {
       fullName,
       role: role || 'basic',
     });
-    const accessToken = jwt.sign(
-      { userId: newUser._id },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '1d',
-      }
-    );
-    newUser.accessToken = accessToken;
+    const jwtToken = generateJwtToken(user);
+    newUser.accessToken = jwtToken;
     await newUser.save();
     res.status(200).json({
-      data: newUser,
+      ...basicDetails(newUser),
       message: 'You registered succesfully',
-      accessToken,
+      jwtToken,
     });
   } catch (error) {
     res.status(500).json({
