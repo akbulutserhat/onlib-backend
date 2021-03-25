@@ -21,6 +21,10 @@ const UserSchema = new Schema({
     default: 'basic',
     enum: ['basic', 'supervisor', 'admin'],
   },
+  libraryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Library',
+  },
   favorited_books: [
     {
       type: mongoose.Schema.Types.ObjectId,

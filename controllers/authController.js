@@ -22,7 +22,7 @@ exports.loginValidate = [
 
 exports.signup = async (req, res, next) => {
   try {
-    const { email, password, fullName, role } = req.body;
+    const { email, password, fullName, library, role } = req.body;
     const user = await User.findOne({ email });
     if (user)
       return res.status(401).json({
@@ -170,6 +170,6 @@ const randomTokenString = () => {
 };
 
 function basicDetails(user) {
-  const { _id, firstName, lastName, email, role } = user;
-  return { _id, firstName, lastName, email, role };
+  const { _id, fullName, email, role, library } = user;
+  return { _id, fullName, email, role, library };
 }
