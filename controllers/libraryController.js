@@ -178,7 +178,9 @@ exports.addBookToLibrary = async (req, res, next) => {
     );
     if (library) {
       // No duplicate
+      await library.populate(populateQuery).execPopulate();
       res.status(200).json({
+        data: library,
         message: 'Book was added to the library.',
       });
     } else {
@@ -246,17 +248,16 @@ exports.deleteBookFromLibrary = async (req, res, next) => {
   try {
     const libraryId = req.params.libraryId;
     const bookId = req.params.bookId;
-    await Library.findByIdAndUpdate(
+    const library = await Library.findByIdAndUpdate(
       libraryId,
       { $pull: { books: { book: bookId } } },
-      { safe: true, useFindAndModify: false }
+      { new: true, useFindAndModify: false }
     );
     await Book.findByIdAndUpdate(
       bookId,
       { $pull: { libraries: libraryId } },
       { safe: true, useFindAndModify: false }
     );
-    const library = Library.findById(libraryId);
     await library.populate(populateQuery).execPopulate();
     res.status(200).json({
       data: library,
@@ -264,7 +265,7 @@ exports.deleteBookFromLibrary = async (req, res, next) => {
     });
   } catch (err) {
     res.status(500).json({
-      error,
+      err,
     });
   }
 };

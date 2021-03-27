@@ -22,6 +22,36 @@ exports.loginValidate = [
 
 exports.signup = async (req, res, next) => {
   try {
+    const { email, password, fullName } = req.body;
+    const user = await User.findOne({ email });
+    if (user)
+      return res.status(401).json({
+        message:
+          'The email address you have entered is already associated with another account.',
+      });
+    const hashedPassword = await hashPassword(password);
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      fullName,
+    });
+    const jwtToken = generateJwtToken(newUser);
+    newUser.accessToken = jwtToken;
+    await newUser.save();
+    res.status(200).json({
+      ...basicDetails(newUser),
+      message: 'You registered succesfully',
+      jwtToken,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error,
+    });
+  }
+};
+
+exports.addUser = async (req, res, next) => {
+  try {
     const { email, password, fullName, library, role } = req.body;
     const user = await User.findOne({ email });
     if (user)
@@ -34,15 +64,13 @@ exports.signup = async (req, res, next) => {
       email,
       password: hashedPassword,
       fullName,
+      libraryId: library,
       role: role || 'basic',
     });
-    const jwtToken = generateJwtToken(user);
-    newUser.accessToken = jwtToken;
     await newUser.save();
     res.status(200).json({
       ...basicDetails(newUser),
-      message: 'You registered succesfully',
-      jwtToken,
+      message: 'User has been added succesfully',
     });
   } catch (error) {
     res.status(500).json({
@@ -164,6 +192,6 @@ const randomTokenString = () => {
 };
 
 function basicDetails(user) {
-  const { _id, fullName, email, role, library } = user;
-  return { _id, fullName, email, role, library };
+  const { _id, fullName, email, role, libraryId } = user;
+  return { _id, fullName, email, role, libraryId };
 }

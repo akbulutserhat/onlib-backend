@@ -79,6 +79,13 @@ router.put(
 );
 
 router.put(
+  '/book/add/:libraryId/:bookId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.addBookToLibrary
+);
+
+router.put(
   '/book/delete/:libraryId/:bookId',
   allowIfLoggedin,
   grantAccess('readAny', 'profile'),

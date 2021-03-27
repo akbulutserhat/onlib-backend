@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 const { allowIfLoggedin } = require('../middlewares/auth');
 
 router.post('/signup', authController.signup);
+router.post('/add-user', authController.addUser);
 
 router.post('/login', authController.loginValidate, authController.login);
 
