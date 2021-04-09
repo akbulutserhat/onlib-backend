@@ -1,6 +1,13 @@
 const Book = require('../models/book');
 const Library = require('../models/library');
 
+exports.getBooksNoPaginate = async (req, res, next) => {
+  const books = await Book.find({});
+  res.status(200).json({
+    data: books,
+  });
+};
+
 exports.getBooks = async (req, res, next) => {
   const page = parseInt(req.params.page);
   const limit = parseInt(req.params.limit);

@@ -11,6 +11,8 @@ router.post(
   bookController.addBook
 );
 
+router.get('/all-books', bookController.getBooksNoPaginate);
+
 router.get(
   '/books/page=:page&limit=:limit',
   allowIfLoggedin,
