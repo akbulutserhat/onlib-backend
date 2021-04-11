@@ -7,17 +7,11 @@ const bookController = require('../controllers/bookController');
 router.post(
   '/',
   allowIfLoggedin,
-  grantAccess('updateAny', 'profile'),
+  grantAccess('readAny', 'profile'),
   bookController.addBook
 );
 
-router.get('/all-books', bookController.getBooksNoPaginate);
-
-router.get(
-  '/books/page=:page&limit=:limit',
-  allowIfLoggedin,
-  bookController.getBooks
-);
+router.get('/books/page=:page&limit=:limit', bookController.getBooks);
 
 router.get('/:bookId', allowIfLoggedin, bookController.getBook);
 
