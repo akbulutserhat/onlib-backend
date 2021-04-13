@@ -17,7 +17,10 @@ exports.getBooks = async (req, res, next) => {
 exports.getBook = async (req, res, next) => {
   try {
     const bookId = req.params.bookId;
-    const book = await Book.findById(bookId).populate('libraries');
+    const book = await await Book.findById(bookId).populate({
+      path: 'libraries',
+      select: 'name address city',
+    });
     if (!book) return next(new Error('Book does not exist')); // display of errors will be fixed.
     res.status(200).json({
       data: book,

@@ -13,7 +13,7 @@ router.post(
 
 router.get('/books/page=:page&limit=:limit', bookController.getBooks);
 
-router.get('/:bookId', allowIfLoggedin, bookController.getBook);
+router.get('/:bookId', bookController.getBook);
 
 router.delete(
   '/:bookId',
