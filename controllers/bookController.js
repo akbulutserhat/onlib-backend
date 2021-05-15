@@ -32,6 +32,25 @@ exports.getBook = async (req, res, next) => {
   }
 };
 
+const escapeRegex = (string) => {
+  return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+
+exports.searchBook = async (req, res, next) => {
+  const search = req.params.search;
+  const regexSearch = new RegExp(escapeRegex(search), 'gi');
+  const page = parseInt(req.params.page);
+  const limit = parseInt(req.params.limit);
+  const books = await Book.find({ title: regexSearch })
+    .skip(limit * page)
+    .limit(limit);
+  const count = await Book.countDocuments({ title: regexSearch });
+  res.status(200).json({
+    data: books,
+    count,
+  });
+};
+
 exports.addBook = async (req, res, next) => {
   try {
     const book = await Book.create(req.body);

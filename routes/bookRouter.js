@@ -13,6 +13,11 @@ router.post(
 
 router.get('/books/page=:page&limit=:limit', bookController.getBooks);
 
+router.get(
+  '/search-book/search=:search&page=:page&limit=:limit',
+  bookController.searchBook
+);
+
 router.get('/:bookId', bookController.getBook);
 
 router.delete(
