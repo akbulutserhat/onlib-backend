@@ -39,6 +39,18 @@ router.post(
   userController.deleteBookFromBasket
 );
 
+router.post(
+  '/add-favorites/:bookId',
+  allowIfLoggedin,
+  userController.addBookToFavorite
+);
+
+router.post(
+  '/delete-favorites/:bookId',
+  allowIfLoggedin,
+  userController.deleteBookFromFavorite
+);
+
 router.post('/confirm', allowIfLoggedin, userController.confirmBasket);
 
 router.post('/clear', allowIfLoggedin, userController.clearRentedArray);
