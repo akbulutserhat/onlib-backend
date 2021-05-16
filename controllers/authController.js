@@ -5,6 +5,14 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { check, validationResult } = require('express-validator');
 
+const populateQuery = [
+  { path: 'favorited_books.book' },
+  { path: 'books_in_the_basket.book' },
+  { path: 'books_in_the_basket.library', select: '_id name city' },
+  { path: 'rented_books.book' },
+  { path: 'rented_books.library', select: '_id name city' },
+];
+
 async function hashPassword(password) {
   return await bcrypt.hash(password, 10);
 }
@@ -115,11 +123,18 @@ exports.login = async (req, res, next) => {
 };
 
 exports.getAuthenticatedUser = async (req, res) => {
-  if (!req.user) return res.status(404).json({ msg: 'No user' });
-  const user = await User.findById(req.user._id).select('-password');
-  return res.status(200).json({
-    user,
-  });
+  try {
+    if (!req.user) return res.status(404).json({ msg: 'No user' });
+    const user = await User.findById(req.user._id).select('-password');
+    await user.populate(populateQuery).execPopulate();
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: `Error occured ${error}`,
+    });
+  }
 };
 
 exports.refreshToken = async (req, res) => {

@@ -13,6 +13,7 @@ const auth_router = require('./routes/authRouter');
 const user_router = require('./routes/userRouter');
 const library_router = require('./routes/libraryRouter');
 const book_router = require('./routes/bookRouter');
+const category_router = require('./routes/categoryRouter');
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGO_URI, {
@@ -56,6 +57,7 @@ app.use('/auth', auth_router);
 app.use('/user', user_router);
 app.use('/library', library_router);
 app.use('/book', book_router);
+app.use('/category', category_router);
 
 app.listen(port, () => {
   console.log(`Server running at here ${port}`);
