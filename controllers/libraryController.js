@@ -194,7 +194,7 @@ exports.addBookToLibrary = async (req, res, next) => {
     );
   } catch (err) {
     res.status(500).json({
-      error,
+      err,
     });
   }
 };
@@ -210,6 +210,25 @@ exports.clear_orders = async (req, res) => {
   res.status(200).json({
     message: `Orders has been cleared`,
   });
+};
+
+exports.clear_library_books = async (req, res) => {
+  try {
+    const libraryId = req.params.libraryId;
+    await Library.findByIdAndUpdate(
+      { _id: libraryId },
+      { $set: { books: [] } },
+      { safe: true, useFindAndModify: false }
+    );
+
+    res.status(200).json({
+      message: `Books has been cleared`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      err,
+    });
+  }
 };
 
 exports.updateLibrary = async (req, res, next) => {

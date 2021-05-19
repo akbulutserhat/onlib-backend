@@ -26,6 +26,13 @@ router.post(
 );
 
 router.post(
+  '/clear/books/:libraryId',
+  allowIfLoggedin,
+  grantAccess('readAny', 'profile'),
+  libraryController.clear_library_books
+);
+
+router.post(
   '/delete/:libraryId/:bookId',
   allowIfLoggedin,
   grantAccess('readAny', 'profile'),
