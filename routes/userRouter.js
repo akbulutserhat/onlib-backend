@@ -55,4 +55,6 @@ router.post('/confirm', allowIfLoggedin, userController.confirmBasket);
 
 router.post('/clear', allowIfLoggedin, userController.clearRentedArray);
 
+router.post('/clear-basket', allowIfLoggedin, userController.clearBasket);
+
 module.exports = router;
