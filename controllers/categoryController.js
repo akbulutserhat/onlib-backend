@@ -54,9 +54,22 @@ exports.getCategories = async (req, res, next) => {
 
 exports.getCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
+  const page = parseInt(req.params.page);
+  const limit = parseInt(req.params.limit);
   const category = await Category.findById(categoryId);
   await category.populate(populateQuery).execPopulate();
+  const bookCount = category.books.length;
+  let count = 0;
+  const paginateBooks = await category.books.filter((book, index) => {
+    if (count < limit && index >= limit * page) {
+      count++;
+      return book;
+    }
+  });
+  //await paginateBooks.populate(populateQuery).execPopulate();
+
   res.status(200).json({
-    data: category,
+    data: { books: paginateBooks },
+    count: bookCount,
   });
 };
