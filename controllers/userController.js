@@ -144,14 +144,15 @@ const checkBasketForSameLibrary = async (basketArray) => {
   );
 };
 
-const checkAllStock = async (userId, basketArray) => {
+/*const checkAllStock = async (userId, basketArray) => {
+  console.log(basketArray);
   let isGreaterThanZero = true;
   for (let index = 0; index < basketArray.length; index++) {
     const library = await Library.findOne({
       _id: basketArray[index].library,
       'books.book': basketArray[index].book,
-      'books.stock': { $gt: 0 },
     });
+    console.log(library);
     if (!library) {
       // Automatic delete book from basket if there is no stock.
       await User.findOneAndUpdate(
@@ -163,7 +164,7 @@ const checkAllStock = async (userId, basketArray) => {
     }
   }
   return isGreaterThanZero;
-};
+}; */
 
 // All books stock should be decreased after confirm operation
 const decreaseStockAmounts = async (basketArray) => {
@@ -183,19 +184,20 @@ exports.confirmBasket = async (req, res, next) => {
     const user = await User.findOne({ _id: userId }).select(
       '-_id -books_in_the_basket._id'
     );
-    const books_in_the_basket = user.books_in_the_basket;
+    const books_in_the_basket = user.books_in_the_basket.slice();
     const isSameLibrary = await checkBasketForSameLibrary(books_in_the_basket);
+    console.log(isSameLibrary);
     if (!isSameLibrary)
       return res.status(400).json({
         message: 'There should only be the same library in the basket !',
       });
-    const isStockEnough = await checkAllStock(books_in_the_basket);
+    /* const isStockEnough = await checkAllStock(userId, books_in_the_basket);
+    console.log(isStockEnough);
     if (!isStockEnough)
       return res.status(400).json({
         message:
           'Books were out of stock and were automatically removed from the basket ! Check again the basket',
-      });
-
+      }); */
     await User.findOneAndUpdate(
       { _id: userId },
       { $push: { rented_books: { $each: books_in_the_basket } } },
@@ -223,7 +225,7 @@ exports.confirmBasket = async (req, res, next) => {
     });
   } catch (err) {
     res.status(500).json({
-      error,
+      err,
     });
   }
 };
@@ -277,6 +279,7 @@ exports.addBookToFavorite = async (req, res, next) => {
       });
     }
   } catch (err) {
+    console.log('catche girdi');
     res.status(500).json({
       error,
     });

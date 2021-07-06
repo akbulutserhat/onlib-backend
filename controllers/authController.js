@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const { check, validationResult } = require('express-validator');
 
 const populateQuery = [
-  { path: 'favorited_books.book' },
+  { path: 'favorited_books' },
   { path: 'books_in_the_basket.book' },
   { path: 'books_in_the_basket.library', select: '_id name city' },
   { path: 'rented_books.book' },

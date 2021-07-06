@@ -28,7 +28,7 @@ router.delete(
 );
 
 router.post(
-  '/:libraryId/:bookId',
+  '/add/basket/:libraryId/:bookId',
   allowIfLoggedin,
   userController.addBookToBasket
 );
@@ -40,7 +40,7 @@ router.post(
 );
 
 router.post(
-  '/add-favorites/:bookId',
+  '/add/add-favorites/:bookId',
   allowIfLoggedin,
   userController.addBookToFavorite
 );
